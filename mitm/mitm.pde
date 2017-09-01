@@ -23,7 +23,7 @@ boolean updateTextfield = false;
 //network
 OscP5 oscP5;
 int listening = 12000;
-int broadcast = 31000;
+int broadcast = 12000;
 String sndPattern = "/interceptor";
 NetAddressList myNetAddressList = new NetAddressList();
 
@@ -72,6 +72,7 @@ void setup() {
     ;    
 
   textFont(font);
+  //blast();
 }
 
 void draw() {
@@ -136,6 +137,7 @@ void sendOSC(Message m) {
  * also tries to add new clients to send to when it sees a ip for first time
  */
 void oscEvent(OscMessage theOscMessage) {
+  println("mitm got a message");
   if (theOscMessage.checkAddrPattern("/client")) {
     connect(theOscMessage.netAddress().address());
     //make sure there is only one 'temp' placeholder in the
@@ -152,6 +154,13 @@ void oscEvent(OscMessage theOscMessage) {
     inward_messages.add(m); 
     updateTextfield = true;
   }
+}
+
+void blast(){
+  OscMessage myOscMessage = new OscMessage("blast");
+  NetAddress blasting = new NetAddress("255.255.255.255", broadcast);
+  oscP5.send(myOscMessage, blasting);  
+   myNetAddressList.add(new NetAddress(blasting));
 }
 
 private void connect(String theIPaddress) {

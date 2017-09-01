@@ -24,6 +24,7 @@ int clientId = 0;
 String sndPattern = "/client";
 String  rcvPattern = "/interceptor";
 NetAddress myBroadcastLocation;
+String remoteAddress = "255.255.255.255";
 
 void settings() {
   int w = displayWidth - 2;
@@ -34,7 +35,7 @@ void settings() {
 void setup() {
   // start up networking
   oscP5 = new OscP5(this, listening);
-  myBroadcastLocation = new NetAddress("192.168.0.4", broadcast);
+  myBroadcastLocation = new NetAddress("255.255.255.255", broadcast);
 
   //use command line args if supplied for networking
   /*if(args != null){
@@ -67,12 +68,13 @@ void draw() {
  * when message it submitted, send to inteceptor
  */
 void submitMessage(String message) { 
-  class submitTask implements Runnable {
+  /*class submitTask implements Runnable {
     String message;
     public submitTask(String m) {
       message = m;
     }
-    public void run() {
+    public void run() {*/
+      println("submit");
       OscMessage myOscMessage = new OscMessage(sndPattern);
       //placeholder for simulating 2 clients
       int clientId = (int)(random(0, 2));
@@ -84,21 +86,21 @@ void submitMessage(String message) {
       //temp for testing
       Message m = new Message(message, clientId);
       messages.add(m);
-    }
+    /*}
   }
   Thread t = new Thread(new submitTask(message));
-  t.start();
+  t.start();*/
 }
 
 
 
 void oscEvent(OscMessage theOscMessage) {
-  class acceptTask implements Runnable {
+ /* class acceptTask implements Runnable {
     OscMessage theOscMessage;
     public acceptTask(OscMessage o) {
       theOscMessage = o;
     }
-    public void run() {
+    public void run() {*/
       //only accept messages from the interceptor
       if (theOscMessage.checkAddrPattern(rcvPattern)==true) {
         int id = theOscMessage.get(0).intValue();
@@ -106,8 +108,8 @@ void oscEvent(OscMessage theOscMessage) {
         Message m = new Message(text, id);
         messages.add(m);
       }
-    }
+   /* }
   }
   Thread t = new Thread(new acceptTask(theOscMessage));
-  t.start();
+  t.start();*/
 }
