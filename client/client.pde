@@ -24,8 +24,8 @@ MessagesList messages;
 
 //network
 OscP5 oscP5;
-int listening = 12000;
-int broadcast = 12000;
+int listening = 31000;
+int broadcast = 31000;
 String sndPattern = "/client";
 String  rcvPattern = "/interceptor";
 NetAddress myBroadcastLocation;
