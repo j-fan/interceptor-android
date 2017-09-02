@@ -29,8 +29,8 @@ FrameLayout fl;
   super.onStart();
   
   //network threading
-  StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-  StrictMode.setThreadPolicy(policy); 
+  //StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+  //StrictMode.setThreadPolicy(policy); 
   
 
   act = this.getActivity();
@@ -58,7 +58,7 @@ FrameLayout fl;
   edit.setLayoutParams(editlayout);
   edit.setHint("insert a message");
   edit.setTextColor(Color.rgb(200, 0, 0));
-  edit.setBackgroundColor(Color.WHITE);
+  edit.setBackgroundColor(Color.parseColor(colorsA[clientId]));
   edit.requestFocus();
   
   //restrict input to 2 lines

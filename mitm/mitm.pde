@@ -10,12 +10,13 @@ import oscP5.*;
 import netP5.*;
 
 //interface
-ControlP5 cp5;
+
 String message = "";
 int bottomMargin = 100;
 int leftMargin = 50;
 int rightMargin = 50;
-Textfield modifiedText;
+int topMargin = 100;
+
 //messages
 MessagesList inward_messages;
 MessagesList outward_messages;
@@ -27,57 +28,37 @@ int broadcast = 12000;
 String sndPattern = "/interceptor";
 NetAddressList myNetAddressList = new NetAddressList();
 
+void settings() {
+  int w = displayWidth - 2;
+  int h = displayHeight - 2;
+  size(w, h, P2D); //p2d is workaround for threading issue in defaukt renderer
+}
 
 void setup() {
-  size(700, 1000);
 
   // start up networking
   oscP5 = new OscP5(this, listening);
-
-  //init message data structures
   
-  //collects unmodified messages going in, works like queue
-  //is it a waiting list to messages to be modified
-  //message 0 is the oldest
-  inward_messages = new MessagesList(6, width-350, height-200); 
+  //UI stuff
+  bottomMargin = displayHeight / 4;
+  topMargin = displayHeight / 12;
+  textSize(56);
+  orientation(PORTRAIT);
+  
+  //init message data structures
+  /*collects unmodified messages going in, works like queue
+   *is it a waiting list to messages to be modified
+    message 0 is the oldest*/
+  inward_messages = new MessagesList(3, width-350, height); 
   //sends out modified messages and keeps a history of them to display
-  outward_messages = new MessagesList(10, width-350, height-200);
+  outward_messages = new MessagesList(10, width-350, height);
 
-  //init interface
-  PFont font = createFont("arial", 20);
-  cp5 = new ControlP5(this);
-  modifiedText = cp5.addTextfield("message")
-    .setColorBackground(color(200))
-    .setColorForeground(color(200))
-    .setColorActive(color(#D1FF5F))
-    .setColor(color(0))
-    .setPosition(leftMargin, height-bottomMargin)
-    .setSize(350, 40)
-    .setFont(createFont("arial", 16))
-    .setAutoClear(true)
-    .setLabel("message")
-    .setText("");
-  ;
-
-  cp5.addBang("bang")
-    .setColorBackground(color(200))
-    .setColorForeground(color(200))
-    .setColorActive(color(#D1FF5F))
-    .setPosition(405, height-bottomMargin)
-    .setSize(80, 40)
-    .setTriggerEvent(Bang.RELEASE)
-    .setLabel("submit")
-    .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
-    .setFont(createFont("arial", 16))
-    ;    
-
-  textFont(font);
-  //blast();
+  blast();
+  Looper.prepare();
 }
 
 void draw() {
   background(50);
-  fill(255);
   outward_messages.display();
   /*
    * to update textfield, load the oldest inward message
@@ -85,15 +66,39 @@ void draw() {
    */
   if (updateTextfield) {
     Message oldest = inward_messages.getOldest();
-    color c = inward_messages.getColor(oldest);
-    modifiedText.setText(oldest.text);
-    modifiedText.setColorBackground(c);
-    modifiedText.setLabel("edit the message from client "+oldest.id);
+    String[] colorsA = {"#AAFFFE","#C8C8C8"};
+    //color c = inward_messages.getColor(oldest);
+    //modifiedText.setText(oldest.text);
+    //modifiedText.setColorBackground(c);
+    //modifiedText.setLabel("edit the message from client "+oldest.id);
+    //to update android UI, must run on ui thread
+    class uiTask implements Runnable {
+      String col;
+      String text;
+      public uiTask(String t, String c) {
+        text = t;
+        col = c;
+      }
+      public void run() {
+        edit.setBackgroundColor(Color.parseColor(col));
+        edit.setText(text);
+      }
+    }
+    act.runOnUiThread(new uiTask(oldest.text,colorsA[oldest.id]));
+
+    println(oldest.text);
     updateTextfield = false;
   }
+  drawTitle();
 }
 
-
+void drawTitle(){
+  textSize(100);
+  fill(255);
+  text("YOU ARE THE INTERCEPTOR",leftMargin,leftMargin,
+       displayWidth-leftMargin-rightMargin,350);
+  textSize(56);
+}
 
 /*
  * create a new modified message when user submits
@@ -102,11 +107,23 @@ void draw() {
  * load the next inward message in textbox
  */
 
-void submitModifiedMessage(Message m) {
-  outward_messages.add(m);
-  sendOSC(m);
-  updateTextfield = true;
-  inward_messages.removeOldest();
+void submitModifiedMessage(String s) {
+  class submitTask implements Runnable {
+    String text;
+    public submitTask(String s) {
+      text = s;
+    }
+    public void run() {  
+      Message m;
+      m = new Message(text, inward_messages.getOldest().id);
+      outward_messages.add(m);
+      sendOSC(m);
+      updateTextfield = true;
+      inward_messages.removeOldest();
+    }
+  }
+  Thread t = new Thread(new submitTask(s));
+  t.start();
 }
 
 /*
@@ -117,9 +134,7 @@ void controlEvent(ControlEvent theEvent) {
     String event = theEvent.getName();
     if (event.equals("message")) {
       String s =theEvent.getStringValue();
-      Message m;
-      m = new Message(s,inward_messages.getOldest().id);
-      submitModifiedMessage(m);
+      submitModifiedMessage(s);
     }
   }
 }
@@ -137,46 +152,37 @@ void sendOSC(Message m) {
  * also tries to add new clients to send to when it sees a ip for first time
  */
 void oscEvent(OscMessage theOscMessage) {
-  println("mitm got a message");
-  if (theOscMessage.checkAddrPattern("/client")) {
-    connect(theOscMessage.netAddress().address());
-    //make sure there is only one 'temp' placeholder in the
-    //textfield at any time
-    int id = theOscMessage.get(0).intValue();
-    String text = theOscMessage.get(1).stringValue();
-    Message m = new Message(text, id);
-    if (inward_messages.isFull()) {
-      Message oldest = inward_messages.getOldest();
-      outward_messages.add(oldest);
-      sendOSC(oldest);
-      inward_messages.removeOldest();
+  class acceptTask implements Runnable {
+    OscMessage theOscMessage;
+    public acceptTask(OscMessage o) {
+      theOscMessage = o;
     }
-    inward_messages.add(m); 
-    updateTextfield = true;
+    public void run() {
+      //println("mitm got a message");
+      if (theOscMessage.checkAddrPattern("/client")) {
+        //make sure there is only one 'temp' placeholder in the
+        //textfield at any time
+        int id = theOscMessage.get(0).intValue();
+        String text = theOscMessage.get(1).stringValue();
+        Message m = new Message(text, id);
+        if (inward_messages.isFull()) {
+          Message oldest = inward_messages.getOldest();
+          outward_messages.add(oldest);
+          sendOSC(oldest);
+          inward_messages.removeOldest();
+        }
+        inward_messages.add(m); 
+        updateTextfield = true;
+      }
+    }
   }
+  Thread t = new Thread(new acceptTask(theOscMessage));
+  t.start();
 }
 
-void blast(){
+void blast() {
   OscMessage myOscMessage = new OscMessage("blast");
   NetAddress blasting = new NetAddress("255.255.255.255", broadcast);
   oscP5.send(myOscMessage, blasting);  
-   myNetAddressList.add(new NetAddress(blasting));
-}
-
-private void connect(String theIPaddress) {
-  if (!myNetAddressList.contains(theIPaddress, broadcast)) {
-    myNetAddressList.add(new NetAddress(theIPaddress, broadcast));
-    println("### adding "+theIPaddress+" to the list.");
-  } else {
-    println("### "+theIPaddress+" is already connected.");
-  }
-  println("### currently there are "+myNetAddressList.list().size()+" remote locations connected.");
-}
-
-/*
- * handle textfield message contents when user submits via 'send' button
- */
-public void bang() {
-  Message m = new Message(cp5.get(Textfield.class, "message").getText(), 0);
-  submitModifiedMessage(m);
+  myNetAddressList.add(new NetAddress(blasting));
 }

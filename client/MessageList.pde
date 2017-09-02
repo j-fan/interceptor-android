@@ -10,7 +10,7 @@ class MessagesList{
   int displayW; 
   int displayH;
   int boxH;
-  color[] colors = {color(#AAFFFE),color(200)};
+  color[] colors = {color(#AAFFFE),color(#C8C8C8)};
    
   MessagesList(int size, int w, int h){
     messageList = new ArrayList<Message>();
