@@ -67,10 +67,6 @@ void draw() {
   if (updateTextfield) {
     Message oldest = inward_messages.getOldest();
     String[] colorsA = {"#AAFFFE","#C8C8C8"};
-    //color c = inward_messages.getColor(oldest);
-    //modifiedText.setText(oldest.text);
-    //modifiedText.setColorBackground(c);
-    //modifiedText.setLabel("edit the message from client "+oldest.id);
     //to update android UI, must run on ui thread
     class uiTask implements Runnable {
       String col;
@@ -126,18 +122,6 @@ void submitModifiedMessage(String s) {
   t.start();
 }
 
-/*
- * handle textfield message contents when user submits via 'enter'
- */
-void controlEvent(ControlEvent theEvent) {
-  if (theEvent.isAssignableFrom(Textfield.class)) {
-    String event = theEvent.getName();
-    if (event.equals("message")) {
-      String s =theEvent.getStringValue();
-      submitModifiedMessage(s);
-    }
-  }
-}
 
 void sendOSC(Message m) {
   OscMessage myOscMessage = new OscMessage(sndPattern);
