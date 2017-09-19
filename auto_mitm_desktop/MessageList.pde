@@ -28,34 +28,7 @@ class MessagesList {
     messageList.add(0, m);
   }
 
-  //if no oldest message exists, generate a new one by a random client
-  Message getOldest() {
 
-    if (messageList.isEmpty()) {
-      return generate();
-    }
-    
-    //make sure the "placeholder" that exists as a empty message
-    //in the textfield when there are no pending messages is removed
-    //when no changes have happened to it
-    
-    Message oldest = messageList.get(messageList.size()-1);
-    if(oldest.text.equals("") && messageList.size() > 1){
-      println("special case");
-      messageList.remove(1);
-      oldest = messageList.get(0);
-    }
-    
-    return oldest;
-  }
-
-  Message generate() {
-    println("generating message");
-    Message gen = new Message("", (int)random(0, 2));
-    updateTextfield = true;
-    add(gen);
-    return gen;
-  }
   
   String toString() {
     String str = "printing messagelist...\n";
