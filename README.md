@@ -1,2 +1,2 @@
 # interceptor
-Interactive artwork. ported to android
+Interactive artwork under development. ported to android
