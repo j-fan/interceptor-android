@@ -1,0 +1,11 @@
+convergent_thinking	divergent_thinking
+parallelogram	trapezium
+magnetic	nonmagnetic
+desirable	undesirable
+externally	internally
+hitch	unhitch
+prefix	suffix
+autumnal_equinox	vernal_equinox
+sleep	wake
+controversial	uncontroversial
+liar	square_shooter
