@@ -24,7 +24,7 @@ int listening = 31000;
 int broadcast = 31000;
 String sndPattern = "/interceptor";
 NetAddressList myNetAddressList = new NetAddressList();
-HashMap<String,String> antonyms;
+HashMap<String,ArrayList<String>> antonyms;
 
 
 void setup() {
@@ -51,7 +51,7 @@ void readAntonyms(){
   BufferedReader reader = createReader("wordnet-antonyms.txt");
   String line = "";
   //hash antonym pairs for better performance
-  antonyms = new HashMap<String,String>(); 
+  antonyms = new HashMap<String,ArrayList<String>>(); 
 
   while(line != null){
     String[] pieces = split(line, TAB);
@@ -59,8 +59,23 @@ void readAntonyms(){
     if(pieces.length == 2){
       pieces[0].replaceAll("_"," ");
       pieces[1].replaceAll("_"," ");
-      antonyms.put(pieces[0],pieces[1]);
-      antonyms.put(pieces[1],pieces[0]);
+      
+      pieces[0].replaceAll("-"," ");
+      pieces[1].replaceAll("-"," ");
+      
+      /* add antonyms to a list so that we can have mutiple mappings to one word*/
+      ArrayList<String> matchingList1 = antonyms.get(pieces[0]);
+      ArrayList<String> matchingList2 = antonyms.get(pieces[0]);
+      if(matchingList1 == null){
+        matchingList1 = new ArrayList<String>(); 
+      }
+      if(matchingList2 == null){
+        matchingList2 = new ArrayList<String>(); 
+      }
+      matchingList1.add(pieces[1]);
+      matchingList2.add(pieces[0]);
+      antonyms.put(pieces[0],matchingList1);
+      antonyms.put(pieces[1],matchingList2);
     }
     try{
       line = reader.readLine(); 
@@ -107,13 +122,16 @@ void modifyAndSend(int id, String text){
     String modified = "";
     while (st.hasMoreTokens()) {
       String oldToken = st.nextToken();
-      String newToken = antonyms.get(oldToken);
+      float chance = random(0,1);
+      ArrayList<String> newTokens = antonyms.get(oldToken.toLowerCase());
       modified += " ";
-      if(newToken != null){
-         modified += newToken; 
-      } else {
+      if(newTokens == null || newTokens.size() == 0 || chance>0.7){
         modified += oldToken;
+        continue;  
       }
+      println(newTokens.get(0));
+      String newToken = newTokens.get(0);
+      modified += newToken; 
     }
     Message m = new Message(modified, id);
     outward_messages.add(m); 
