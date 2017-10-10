@@ -10,6 +10,7 @@ angry	calm
 same different
 stay	leave
 rich	poor
+last	first
 pretty	ugly
 limited	unlimited
 convergent_thinking	divergent_thinking

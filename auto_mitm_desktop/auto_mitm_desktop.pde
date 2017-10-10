@@ -37,7 +37,7 @@ void setup() {
   myNetAddressList.add(new NetAddress("255.255.255.255",broadcast));
 
   //set up outward message list
-  outward_messages = new MessagesList(10, width-350, height-100);
+  outward_messages = new MessagesList(14, width-350, height-100);
   PFont font = createFont("arial", 20);
     textFont(font);
 
@@ -145,7 +145,12 @@ void readAntonyms(){
     }  
     
   }
+
 }
+
+void exit() {
+  endLog();
+} 
 
 String mydate()
 {
@@ -159,7 +164,7 @@ void createLog(){
 }
 
 void endLog(){
-  output.flush(); // Writes the remaining data to the file
+  output.flush(); 
   output.close(); // Finishes the file
 }
 
