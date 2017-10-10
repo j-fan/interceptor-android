@@ -9,6 +9,7 @@ import controlP5.*;
 import oscP5.*;
 import netP5.*;
 import java.util.StringTokenizer;
+import java.util.Date;
 
 //interface
 ControlP5 cp5;
@@ -25,6 +26,7 @@ int broadcast = 31000;
 String sndPattern = "/interceptor";
 NetAddressList myNetAddressList = new NetAddressList();
 HashMap<String,ArrayList<String>> antonyms;
+PrintWriter output;
 
 
 void setup() {
@@ -35,7 +37,7 @@ void setup() {
   myNetAddressList.add(new NetAddress("255.255.255.255",broadcast));
 
   //set up outward message list
-  outward_messages = new MessagesList(10, width-350, height-200);
+  outward_messages = new MessagesList(10, width-350, height-100);
   PFont font = createFont("arial", 20);
     textFont(font);
 
@@ -44,9 +46,68 @@ void setup() {
   sendOSC(new Message("connect plz",1));
   
   readAntonyms();
+  createLog();
 
 }
 
+
+void draw() {
+  background(50);
+  fill(255);
+  outward_messages.display();
+
+
+}
+
+
+void sendOSC(Message m) {
+  OscMessage myOscMessage = new OscMessage(sndPattern);
+  myOscMessage.add(m.id);
+  myOscMessage.add(m.text);
+  oscP5.send(myOscMessage, myNetAddressList);
+}
+
+void keyPressed() {
+  endLog();
+  exit();
+}
+
+/*
+ * intercept and alter message automatically
+ */
+void oscEvent(OscMessage theOscMessage) {
+  if (theOscMessage.checkAddrPattern("/client")) {
+    //connect(theOscMessage.netAddress().address());
+    //make sure there is only one 'temp' placeholder in the
+    //textfield at any time
+    int id = theOscMessage.get(0).intValue();
+    String text = theOscMessage.get(1).stringValue();
+    modifyAndSend(id,text);
+    
+  }
+}
+
+void modifyAndSend(int id, String text){
+    StringTokenizer st = new StringTokenizer(text);
+    String modified = "";
+    while (st.hasMoreTokens()) {
+      String oldToken = st.nextToken();
+      float chance = random(0,1);
+      ArrayList<String> newTokens = antonyms.get(oldToken.toLowerCase());
+      modified += " ";
+      if(newTokens == null || newTokens.size() == 0 || chance>0.7){
+        modified += oldToken;
+        continue;  
+      }
+      println(newTokens.get(0));
+      String newToken = newTokens.get(0);
+      modified += newToken; 
+    }
+    addLog(id,modified);
+    Message m = new Message(modified, id);
+    outward_messages.add(m); 
+    sendOSC(m);
+}
 void readAntonyms(){
   BufferedReader reader = createReader("wordnet-antonyms.txt");
   String line = "";
@@ -86,56 +147,24 @@ void readAntonyms(){
   }
 }
 
-void draw() {
-  background(50);
-  fill(255);
-  outward_messages.display();
+String mydate()
+{
+  Date d = new Date();
+  String date = new java.text.SimpleDateFormat("hh-mm-sa_dd_MMM").format(d);
+  return date;
+} 
 
-
+void createLog(){
+  output = createWriter(mydate()+".txt"); 
 }
 
-
-void sendOSC(Message m) {
-  OscMessage myOscMessage = new OscMessage(sndPattern);
-  myOscMessage.add(m.id);
-  myOscMessage.add(m.text);
-  oscP5.send(myOscMessage, myNetAddressList);
+void endLog(){
+  output.flush(); // Writes the remaining data to the file
+  output.close(); // Finishes the file
 }
 
-/*
- * intercept and alter message automatically
- */
-void oscEvent(OscMessage theOscMessage) {
-  if (theOscMessage.checkAddrPattern("/client")) {
-    //connect(theOscMessage.netAddress().address());
-    //make sure there is only one 'temp' placeholder in the
-    //textfield at any time
-    int id = theOscMessage.get(0).intValue();
-    String text = theOscMessage.get(1).stringValue();
-    modifyAndSend(id,text);
-    
-  }
-}
-
-void modifyAndSend(int id, String text){
-    StringTokenizer st = new StringTokenizer(text);
-    String modified = "";
-    while (st.hasMoreTokens()) {
-      String oldToken = st.nextToken();
-      float chance = random(0,1);
-      ArrayList<String> newTokens = antonyms.get(oldToken.toLowerCase());
-      modified += " ";
-      if(newTokens == null || newTokens.size() == 0 || chance>0.7){
-        modified += oldToken;
-        continue;  
-      }
-      println(newTokens.get(0));
-      String newToken = newTokens.get(0);
-      modified += newToken; 
-    }
-    Message m = new Message(modified, id);
-    outward_messages.add(m); 
-    sendOSC(m);
+void addLog(int clientid,String message){
+  output.println("client "+clientid+": "+message);
 }
 
 private void connect(String theIPaddress) {
