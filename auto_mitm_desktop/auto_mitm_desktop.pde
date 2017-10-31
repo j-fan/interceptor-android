@@ -42,8 +42,8 @@ void setup() {
     textFont(font);
 
   //send these dummy messages or else phones refuse to connect :(
-  sendOSC(new Message("connect plz",0));
-  sendOSC(new Message("connect plz",1));
+  //sendOSC(new Message("connect plz",0));
+  //sendOSC(new Message("connect plz",1));
   
   readAntonyms();
   createLog();
