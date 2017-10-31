@@ -10,7 +10,7 @@ class MessagesList{
   int displayW; 
   int displayH;
   int boxH;
-  color[] colors = {color(#AAFFFE),color(#C8C8C8)};
+  color[] colors = {color(#AAFFFE),color(#C8C8C8),color(#E98A14)};
    
   MessagesList(int size, int w, int h){
     messageList = new ArrayList<Message>();
@@ -30,19 +30,21 @@ class MessagesList{
   
   void display(){
     for(int i=0; i<messageList.size();i++){
-        int id = messageList.get(i).id % 2;
+        //int id = messageList.get(i).id % 2;
+        int id = messageList.get(i).id;
         color c = colors[id];
         fill(c);
         noStroke();
         //h is used to scale box according to message length
         String text = messageList.get(i).text;
-        int h = (text.length() / 35 + 1) * 80;
+        //int h = (text.length() / 35 + 1) * 80;
+        int h = 80;
         int xStart;
-        if(id == 0){
-          xStart = width-rightMargin-displayW;
-        } else {
+        //if(id == 0){
+          //xStart = width-rightMargin-displayW;
+        //} else {
           xStart = leftMargin;
-        }
+        //}
         rect(xStart,topMargin +(boxH*(maxSize-i)), displayW,h);
         fill(color(0));
         text(text,xStart+10,topMargin +(boxH*(maxSize-i))+10, displayW-10,h-10);

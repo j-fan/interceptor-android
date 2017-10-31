@@ -37,7 +37,7 @@ void setup() {
   myNetAddressList.add(new NetAddress("255.255.255.255",broadcast));
 
   //set up outward message list
-  outward_messages = new MessagesList(14, width-350, height-100);
+  outward_messages = new MessagesList(14, width-200, height-100);
   PFont font = createFont("arial", 20);
     textFont(font);
 
@@ -64,6 +64,7 @@ void sendOSC(Message m) {
   OscMessage myOscMessage = new OscMessage(sndPattern);
   myOscMessage.add(m.id);
   myOscMessage.add(m.text);
+  //println("sent");
   oscP5.send(myOscMessage, myNetAddressList);
 }
 

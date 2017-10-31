@@ -61,8 +61,8 @@ FrameLayout fl;
   edit.setBackgroundColor(Color.parseColor(colorsA[clientId]));
   edit.requestFocus();
   
-  //restrict input to 2 lines
-  edit.addTextChangedListener(new EditTextLinesLimiter(edit, 2));
+  //restrict input to 1 lines
+  edit.addTextChangedListener(new EditTextLinesLimiter(edit, 1));
 
   //handle enter key event
   edit.setOnKeyListener(new View.OnKeyListener() {

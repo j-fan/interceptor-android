@@ -8,7 +8,7 @@ import controlP5.*;
 import oscP5.*;
 import netP5.*;
 
-int clientId = 0;
+int clientId = 1;
 
 //interface
 int bottomMargin = 100;
@@ -16,7 +16,7 @@ int topMargin = 100;
 int leftMargin = 50;
 int rightMargin = 50;
 //change processing color array if this android colors also changes
-String[] colorsA = {"#AAFFFE","#C8C8C8"};
+String[] colorsA = {"#AAFFFE","#C8C8C8","#E98A14"};
 
 
 //messages
@@ -42,7 +42,7 @@ void setup() {
   //init message data structures
   bottomMargin = displayHeight / 4;
   topMargin = displayHeight / 10;
-  messages = new MessagesList(8, width-350, height);
+  messages = new MessagesList(8, width-200, height);
 
   textSize(56);
   orientation(PORTRAIT);
@@ -63,13 +63,18 @@ void draw() {
 void drawTitle(){
   //unfortunately have to declare colors array here
   //due to issues of it rendering black for all
-  color[] colors = {color(#AAFFFE),color(#C8C8C8)};
-  textSize(130);
+  color[] colors = {color(#AAFFFE),color(#C8C8C8),color(#E98A14)};
+ 
   String t = "YOU ARE ";
   if(clientId==0){
     t += "BLUE";
-  } else {
+    textSize(130);
+  } else if (clientId==1){
     t += "GREY";
+    textSize(130);
+  } else {
+    t += "ORANGE"; 
+    textSize(100);
   }
   fill(colors[clientId]);
   text(t,leftMargin,topMargin);
