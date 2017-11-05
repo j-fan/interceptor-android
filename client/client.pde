@@ -17,7 +17,8 @@ import controlP5.*;
 import oscP5.*;
 import netP5.*;
 
-int clientId = 1;
+// change this line and rerun app on phone to get new client
+int clientId = 1; //only valid numbers are 0-2
 
 //interface
 int bottomMargin = 100;
