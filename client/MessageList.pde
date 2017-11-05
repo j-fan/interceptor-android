@@ -30,23 +30,20 @@ class MessagesList{
   
   void display(){
     for(int i=0; i<messageList.size();i++){
-        //int id = messageList.get(i).id % 2;
+        // id = client id
         int id = messageList.get(i).id;
         color c = colors[id];
         fill(c);
         noStroke();
-        //h is used to scale box according to message length
         String text = messageList.get(i).text;
-        //int h = (text.length() / 35 + 1) * 80;
         int h = 80;
         int xStart;
-        //if(id == 0){
-          //xStart = width-rightMargin-displayW;
-        //} else {
-          xStart = leftMargin;
-        //}
+        xStart = leftMargin;
+        
+        //draw message box
         rect(xStart,topMargin +(boxH*(maxSize-i)), displayW,h);
         fill(color(0));
+        //draw message text
         text(text,xStart+10,topMargin +(boxH*(maxSize-i))+10, displayW-10,h-10);
     }
     

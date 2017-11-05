@@ -1,7 +1,16 @@
 /*
-  this is the interceptor
- run command line using
- processing-java.exe --sketch="D:\Adelruna2\Documents\sketchbook\interceptor\mitm" --run
+ * this is the interceptor, to be run on desktop
+ * it recieves messages from all clients
+ * intercepts them and switches some words
+ * for their antonyms based on wordnet-antonyms.txt
+ * and sends them back out to intended recipient
+ * Networking is extremely basic. It just broadcasts
+ * to entire network. Because of the slow rate of messages
+ * being sent by clients, this is acceptable.
+ * messages also get logged to a file each run
+ *
+ * messages may not be recieved if you are on a network 
+ * flagged as public on your OS
  */
 
 
@@ -12,7 +21,6 @@ import java.util.StringTokenizer;
 import java.util.Date;
 
 //interface
-ControlP5 cp5;
 String message = "";
 int bottomMargin = 100;
 int leftMargin = 50;
@@ -41,9 +49,6 @@ void setup() {
   PFont font = createFont("arial", 20);
     textFont(font);
 
-  //send these dummy messages or else phones refuse to connect :(
-  //sendOSC(new Message("connect plz",0));
-  //sendOSC(new Message("connect plz",1));
   
   readAntonyms();
   createLog();
@@ -56,9 +61,7 @@ void draw() {
   fill(255);
   outward_messages.display();
 
-
 }
-
 
 void sendOSC(Message m) {
   OscMessage myOscMessage = new OscMessage(sndPattern);
@@ -78,9 +81,6 @@ void keyPressed() {
  */
 void oscEvent(OscMessage theOscMessage) {
   if (theOscMessage.checkAddrPattern("/client")) {
-    //connect(theOscMessage.netAddress().address());
-    //make sure there is only one 'temp' placeholder in the
-    //textfield at any time
     int id = theOscMessage.get(0).intValue();
     String text = theOscMessage.get(1).stringValue();
     modifyAndSend(id,text);
@@ -88,6 +88,9 @@ void oscEvent(OscMessage theOscMessage) {
   }
 }
 
+/*
+ * break up message into word tokens. Swap them for the antonym if it exists
+ */
 void modifyAndSend(int id, String text){
     StringTokenizer st = new StringTokenizer(text);
     String modified = "";
@@ -109,6 +112,13 @@ void modifyAndSend(int id, String text){
     outward_messages.add(m); 
     sendOSC(m);
 }
+
+/*
+ * read in antonym pairs and creating a hashmap (of arraylists)
+ * to facilitate lookup
+ * it can map 1 word to n words.
+ */
+ 
 void readAntonyms(){
   BufferedReader reader = createReader("wordnet-antonyms.txt");
   String line = "";

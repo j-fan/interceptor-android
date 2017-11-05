@@ -1,7 +1,16 @@
 /*
-  this is the chat client
- run command line using
- processing-java.exe --sketch="D:\Adelruna2\Documents\sketchbook\interceptor\client" --run argu "12001"
+ * this is the client, to be run on android
+ * it's job is to send, recieve and show messages
+ * it sends and renders messages based on client id
+ * it only supports id 0-2, which is 3 clients 
+ * it doesn't attempt to handle case where the is >3 clients
+ * you might notice that there is duplications of colorsA[]
+ * and colors[] arrays since there seems to be some 
+ * incompatiability with Processing and android's threads
+ * causing globals to be uninitialised (no idea why)
+ *
+ * messages may not be recieved if you are on a network 
+ * flagged as public on your OS
  */
 
 import controlP5.*;
@@ -91,20 +100,13 @@ void submitMessage(String message) {
       message = m;
     }
     public void run() {
-      //println("submit");
+
       OscMessage myOscMessage = new OscMessage(sndPattern);
       
-      //placeholder for simulating 2 clients
-      //int clientId = (int)(random(0, 2));
-      
-      //println(clientId);
       myOscMessage.add(clientId);
       myOscMessage.add(message);
       oscP5.send(myOscMessage, myBroadcastLocation);
 
-      //temp for testing. show message immediately.
-      //Message m = new Message(message, clientId);
-      //messages.add(m);
     }
   }
   Thread t = new Thread(new submitTask(message));

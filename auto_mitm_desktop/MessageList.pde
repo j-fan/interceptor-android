@@ -65,18 +65,15 @@ class MessagesList {
       color c = colors[id];
       fill(c);
       noStroke();
-      //h is used to scale box according to message length
       String text = messageList.get(i).text;
-      //int h = (text.length() / 35 + 1) * 30;
       int h = 30;
       int xStart;
-      //if (id == 0) {
-        //xStart = width-rightMargin-displayW;
-      //} else {
-        xStart = leftMargin;
-      //}
+      xStart = leftMargin;
+
+      //draw message box
       rect(xStart, boxH*(maxSize-i), displayW, h);
       fill(color(0));
+      //draw message text
       text(text, xStart+10, boxH*(maxSize-i), displayW-25, h);
     }
   }
